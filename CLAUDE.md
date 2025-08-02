@@ -24,7 +24,7 @@ Todo 1. "Specific task 1"\n 2. "Specific task 2"\n 3. "Specific task 3"
 
 - Use research-specialist subagent when you do your research.
 
-- Strategic use of the `/serena` command for token efficient and structured problem solving. Create applications, components, APIs, systems and tests with maximum efficiency.
+- **MUST** use strategly the `/serena` command for token efficient and structured problem solving. Create applications, components, APIs, systems and tests with maximum efficiency.
 
 ### Development Principles
 
