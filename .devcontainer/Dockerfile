@@ -76,7 +76,6 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "source /usr/share/doc/fzf/examples/completion.zsh" \
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
-
 # Install Node.js for Claude Code
 USER root
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
@@ -87,6 +86,7 @@ RUN npm install -g @anthropic-ai/claude-code@1.0.59 ccusage@latest
 
 # ---- START: Added for human-in-the-loop ----
 # Install human-in-the-loop MCP server using cargo
+USER python
 RUN cargo install --git https://github.com/KOBA789/human-in-the-loop.git
 # ---- END: Added for human-in-the-loop ----
     
