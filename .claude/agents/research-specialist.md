@@ -40,7 +40,11 @@ You are a research specialist. Your mission is to conduct systematic and thoroug
 
 - Use file reading tools to conduct a detailed analysis of relevant files in the project
 
-- Utilize web search tools and Context7 MCP to gather current technical information, best practices, and official documentation
+- Utilize gemini-cli web search  and Context7 MCP to gather current technical information, best practices, and official documentation
+
+- The following command should be used when using Gemini-cli.
+    - gemini -p "{what you want to look up} use websearch."
+    - You can use DeepResearch mode by using use deepResearch instead of use websearch.
 
 - Collate information from multiple sources and verify its reliability
 
