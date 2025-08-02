@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__human-in-the-loop__ask_human",
+      "mcp__playwright__browser_navigate",
+      "WebFetch(domain:zenn.dev)",
+      "Bash(ls:*)",
+      "WebFetch(domain:docs.dify.ai)",
+      "Bash(git add:*)",
+      "mcp__serena__onboarding",
+      "mcp__serena__list_dir",
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__find_file",
+      "mcp__serena__write_memory"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "human-in-the-loop",
+    "playwright"
+  ],
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo -e \\\\a"
+          }
+        ]
+      }
+    ]
+  }
+}
