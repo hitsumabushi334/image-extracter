@@ -26,6 +26,8 @@ Todo 1. "Specific task 1"\n 2. "Specific task 2"\n 3. "Specific task 3"
 
 - **MUST** use strategly the `/serena` command for token efficient and structured problem solving. Create applications, components, APIs, systems and tests with maximum efficiency.
 
+- Regularly update serena's memory.
+
 ### Development Principles
 
 1. **YAGNI**: Do not implement features that may not be used in the future. 2.
