@@ -53,7 +53,7 @@ RUN ARCH=$(dpkg --print-architecture) && \
 
 # Install Python development tools
 RUN pip install --upgrade pip && \
-  pip install poetry black flake8 pylint pytest ipython uv uvx
+  pip install poetry black flake8 pylint pytest ipython uv
 
 # Set up non-root user
 USER python
