@@ -12,7 +12,9 @@
       "mcp__serena__get_symbols_overview",
       "mcp__serena__find_file",
       "mcp__serena__write_memory",
-      "Bash(gemini:*)"
+      "Bash(gemini:*)",
+      "mcp__serena__activate_project",
+      "mcp__serena__check_onboarding_performed"
     ]
   },
   "enableAllProjectMcpServers": true,

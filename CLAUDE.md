@@ -88,6 +88,8 @@ When a request for code review is made, the review must be conducted in Japanese
 
 - Use `/kiro:spec-status [feature-name]` to check progress
 
+- `pptx-textbox-mcp`: PowerPoint テキストボックス MCP サーバー - Python/uv/python-pptx/Fast-MCP を使用してテキスト入力からスライド生成
+
 ## Development Guidelines
 
 - You nust think in English, but generate responses in Japanese (思考は英語、回答の生成は日本語で行うように)
