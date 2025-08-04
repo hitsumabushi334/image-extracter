@@ -50,4 +50,4 @@
 
 ## フィードバック作成
 
-- レビュー結果は`workspace/pair-feedback.md`にフィードバックを記載
+- レビュー結果は`workspace/.kiro/$ARGUMENT/pair-feedback.md`にフィードバックを記載
