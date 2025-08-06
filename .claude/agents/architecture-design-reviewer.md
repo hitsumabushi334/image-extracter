@@ -1,7 +1,7 @@
 ---
 name: architecture-design-reviewer
 description: Use this agent when you need to review code for adherence to design principles and architectural patterns. Examples: <example>Context: The user has just implemented a new feature and wants to ensure it follows proper design principles. user: 'I've just added a new authentication module. Can you review it for design principles?' assistant: 'I'll use the architecture-design-reviewer agent to analyze your authentication module for adherence to design principles and architectural patterns.' <commentary>Since the user wants a design and architecture review of recently written code, use the architecture-design-reviewer agent.</commentary></example> <example>Context: The user has refactored existing code and wants to verify architectural consistency. user: 'I've refactored the data access layer. Please check if it maintains good architecture.' assistant: 'Let me use the architecture-design-reviewer agent to evaluate your refactored data access layer for architectural consistency and design principles.' <commentary>The user needs architectural review of refactored code, so use the architecture-design-reviewer agent.</commentary></example>
-tools: Glob, Grep, LS, ExitPlanMode, Read, NotebookRead, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch
 color: green
 ---
 

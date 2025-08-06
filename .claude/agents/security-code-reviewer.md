@@ -1,7 +1,7 @@
 ---
 name: security-code-reviewer
 description: Use this agent when you need to perform security-focused code reviews to identify potential vulnerabilities, security flaws, or unsafe coding practices. Examples: <example>Context: The user has just implemented a new authentication function and wants to ensure it's secure before deployment. user: "認証機能を実装しました。セキュリティ上の問題がないか確認してください" assistant: "セキュリティレビューのためにsecurity-code-reviewerエージェントを使用します"</example> <example>Context: The user has written code that handles user input and wants to check for security vulnerabilities. user: "ユーザー入力を処理するコードを書きました" assistant: "入力処理のセキュリティを確認するためにsecurity-code-reviewerエージェントを使用してレビューを行います"</example>
-tools: Glob, Grep, LS, ExitPlanMode, Read, NotebookRead, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, mcp__serena__list_dir, mcp__serena__find_file, mcp__serena__replace_regex, mcp__serena__search_for_pattern, mcp__serena__restart_language_server, mcp__serena__get_symbols_overview, mcp__serena__find_symbol, mcp__serena__find_referencing_symbols, mcp__serena__replace_symbol_body, mcp__serena__insert_after_symbol, mcp__serena__insert_before_symbol, mcp__serena__write_memory, mcp__serena__read_memory, mcp__serena__list_memories, mcp__serena__delete_memory, mcp__serena__activate_project, mcp__serena__check_onboarding_performed, mcp__serena__onboarding, mcp__serena__think_about_collected_information, mcp__serena__think_about_task_adherence, mcp__serena__think_about_whether_you_are_done
 color: blue
 ---
 
