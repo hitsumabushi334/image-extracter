@@ -8,7 +8,7 @@
 - **目的**: JSON形式の構造化入力から複数スライドを持つPowerPointファイルを生成
 - **入力形式**: `{page1:{text:["text1","text2",...]},page2:{...}...}`
 - **出力**: ページごとに複数テキストボックスを含む.pptxファイル
-- **プロトコル**: MCP (Model Context Protocol) v1.0準拠
+- **プロトコル**: MCP (Model Context Protocol) v1.0準拠 (HTTPS接続のみ)
 - **フレームワーク**: FastMCP（Python）
 
 ### 1.2 要件との対応関係
@@ -235,9 +235,8 @@ class PPTXGenerator:
     
     def _create_slide(self, prs: Presentation, title: str):
         """スライド作成"""
-        slide_layout = prs.slide_layouts[1]  # タイトルとコンテンツ
+        slide_layout = prs.slide_layouts[6]  # 白紙レイアウト
         slide = prs.slides.add_slide(slide_layout)
-        slide.shapes.title.text = title
         return slide
     
     async def _add_text_boxes(self, slide, texts: List[str]):
@@ -257,13 +256,9 @@ class LayoutFactory:
         self.config = config
     
     def calculate_layout(self, text_count: int) -> Layout:
-        """テキスト数に基づくレイアウト計算"""
-        if text_count <= 2:
-            return TwoColumnLayout()
-        elif text_count <= 4:
-            return GridLayout(2, 2)
-        else:
-            return FlowLayout(text_count)
+        """テキスト数に基づく簡単なレイアウト計算"""
+        # 白紙レイアウトでのシンプルな配置
+        return SimpleVerticalLayout(text_count)
 
 class Layout:
     def get_position(self, index: int) -> Position:

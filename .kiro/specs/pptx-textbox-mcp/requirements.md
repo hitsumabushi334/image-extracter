@@ -9,7 +9,7 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 - **プログラミング言語**: Python
 - **パッケージマネージャー**: uv
 - **必須ライブラリ**: python-pptx, Fast-MCP
-- **アーキテクチャ**: MCP (Model Context Protocol) サーバー
+- **アーキテクチャ**: MCP (Model Context Protocol) サーバー (HTTPS接続のみ)
 - **フレームワーク**: FastMCP for Python MCP server development
 
 ## 2. 機能要件
@@ -50,7 +50,7 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 
 #### 2.3.2 受入基準（EARS形式）
 - **WHEN** 有効な文字列入力を受信した時 **THEN** システム **SHALL** python-pptxライブラリを使用してPowerPointプレゼンテーションを作成する
-- **WHEN** 新しいプレゼンテーションを作成する時 **THEN** システム **SHALL** 標準的なスライドレイアウトでスライドを1枚作成する
+- **WHEN** 新しいプレゼンテーションを作成する時 **THEN** システム **SHALL** 白紙レイアウトでスライドを作成する
 - **WHEN** テキストボックスを配置する時 **THEN** システム **SHALL** スライドの中央部に配置し、適切なフォントサイズを設定する
 - **IF** テキストが長い場合 **THEN** システム **SHALL** テキストボックスのサイズを自動調整し、テキストが完全に表示されるようにする
 - **WHERE** スライドを生成する場合 **THE SYSTEM SHALL** デフォルトのフォント、サイズ、色設定を適用する
