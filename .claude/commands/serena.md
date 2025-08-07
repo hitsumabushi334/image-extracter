@@ -8,6 +8,14 @@
 /serena implement "add feature X"     # Implementation (6-10 thoughts)
 ```
 
+## subagents
+
+Call the most appropriate subagent for the instruction. Also, pass necessary information to the subagent in a compact manner.
+
+- kiro-task-implementer: A sub-agent that performs implementation work based on a task list.
+- code-refactoring-specialist: a sub-agent specialized in refactoring.
+- research-specialist: a sub-agent specialized in research.
+
 ## Options
 
 | Option | Description                      | Usage                               | Use Case                         |

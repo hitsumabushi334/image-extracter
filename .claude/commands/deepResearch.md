@@ -1,3 +1,7 @@
+---
+description: Initialize a new specification with detailed project description and requirements
+allowed-tools: Bash(gemini -p *),Write
+---
 # DeepResearch command
 
 "$ARGUMENT" is what you want to research.
