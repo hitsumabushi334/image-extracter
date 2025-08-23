@@ -1,6 +1,6 @@
 ---
 description: Initialize a new specification with detailed project description and requirements
-allowed-tools: Bash(gemini -p *),Write
+allowed-tools: MCP,Write
 ---
 # DeepResearch command
 
@@ -8,6 +8,5 @@ allowed-tools: Bash(gemini -p *),Write
 
 ## rule
 - First, multiple survey items are generated for "$ARGUMENT" from multiple perspectives. (QUERY)
-- Next, **Must be use** follow gemini command .
-    - gemini -p "QUERY use web search".
+- Next, **Must be use** research-specialist agent
 - After completing the survey, create a report with the name {survey item}_deepresearch.md.

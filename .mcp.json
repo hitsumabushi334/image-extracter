@@ -12,7 +12,10 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest"],
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ],
       "env": {}
     },
     "serena": {
@@ -27,6 +30,15 @@
         "--project",
         "/workspace"
       ]
+    },
+    "gemini-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@choplin/mcp-gemini-cli",
+        "--allow-npx"
+      ],
+      "env": {}
     }
   }
 }
