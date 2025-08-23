@@ -81,7 +81,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
   apt-get install -y nodejs
 
 # Install Claude Code via npm
-RUN npm install -g @anthropic-ai/claude-code@latest ccusage@latest @google/gemini-cli@latest
+RUN npm install -g @anthropic-ai/claude-code@1.0.81 ccusage@latest @google/gemini-cli@latest
 
 # ---- START: Added for human-in-the-loop ----
 # Install human-in-the-loop MCP server using cargo
