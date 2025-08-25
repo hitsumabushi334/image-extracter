@@ -29,17 +29,5 @@
     "serena",
     "gemini-cli"
   ],
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo -e \\\\a"
-          }
-        ]
-      }
-    ]
-  }
+
 }
