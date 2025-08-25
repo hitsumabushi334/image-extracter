@@ -26,7 +26,8 @@
   "enabledMcpjsonServers": [
     "human-in-the-loop",
     "playwright",
-    "serena"
+    "serena",
+    "gemini-cli"
   ],
   "hooks": {
     "Stop": [

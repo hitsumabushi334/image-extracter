@@ -79,13 +79,20 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
 USER root
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
   apt-get install -y nodejs
-
+# Configure npm for the non-root user
+USER python
+# 1. pythonユーザーのホームディレクトリに、npmパッケージ用のディレクトリを作成
+RUN mkdir -p /home/python/.npm-global
+# 2. npmに対して、グローバルインストールの場所を上記ディレクトリに設定
+RUN npm config set prefix '/home/python/.npm-global'
+# 3. 新しく設定したパスを環境変数PATHに追加し、コマンドが見つかるようにする
+ENV PATH="/home/python/.npm-global/bin:${PATH}"
+# ---- END: npm/npx 修正箇所 ----
 # Install Claude Code via npm
 RUN npm install -g @anthropic-ai/claude-code@1.0.81 ccusage@latest @google/gemini-cli@latest
 
 # ---- START: Added for human-in-the-loop ----
 # Install human-in-the-loop MCP server using cargo
-USER python
 RUN cargo install --git https://github.com/KOBA789/human-in-the-loop.git
 # ---- END: Added for human-in-the-loop ----
     

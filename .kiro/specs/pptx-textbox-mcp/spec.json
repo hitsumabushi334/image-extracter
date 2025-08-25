@@ -1,22 +1,33 @@
 {
   "feature_name": "pptx-textbox-mcp",
-  "project_description": "入力された文字列のテキストボックスをもつスライドをアウトプットとするMCPサーバーを作りたい。技術スタックはPython、uv,使用ライブラリはpython-pptx,Fast-MCPを必須とする。",
+  "project_description": "入力された文字列のテキストボックスをもつスライドをアウトプットとするAWS Lambda MCPサーバーを作りたい。技術スタックはPython、uv、使用ライブラリはpython-pptx、mcp_lambda_handlerを必須とする。Lambda Function URLで公開する。",
   "created_at": "2025-08-02T17:41:00Z",
-  "updated_at": "2025-08-02T17:47:00Z",
+  "updated_at": "2025-08-23T00:00:00Z",
   "language": "japanese",
-  "phase": "tasks-generated",
+  "phase": "tasks-updated",
+  "technology_stack": {
+    "runtime": "AWS Lambda",
+    "language": "Python 3.11+",
+    "framework": "mcp_lambda_handler",
+    "libraries": ["python-pptx", "boto3"],
+    "deployment": "Lambda Function URL",
+    "package_manager": "uv"
+  },
   "approvals": {
     "requirements": {
       "generated": true,
-      "approved": true
+      "approved": true,
+      "updated_for_lambda": true
     },
     "design": {
       "generated": true,
-      "approved": true
+      "approved": true,
+      "updated_for_lambda": true
     },
     "tasks": {
       "generated": true,
-      "approved": false
+      "approved": false,
+      "updated_for_lambda": true
     }
   },
   "ready_for_implementation": false

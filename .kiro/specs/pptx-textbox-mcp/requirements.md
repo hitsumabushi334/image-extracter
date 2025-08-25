@@ -8,9 +8,10 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 ### 1.2 技術的制約
 - **プログラミング言語**: Python
 - **パッケージマネージャー**: uv
-- **必須ライブラリ**: python-pptx, Fast-MCP
-- **アーキテクチャ**: MCP (Model Context Protocol) サーバー (HTTPS接続のみ)
-- **フレームワーク**: FastMCP for Python MCP server development
+- **必須ライブラリ**: python-pptx, mcp_lambda_handler
+- **実行環境**: AWS Lambda
+- **アーキテクチャ**: MCP (Model Context Protocol) サーバー (Lambda Function URL)
+- **フレームワーク**: mcp_lambda_handler for AWS Lambda MCP server development
 
 ## 2. 機能要件
 
@@ -25,13 +26,13 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 - **WHEN** クライアントがMCPサーバーに接続要求を送信した時 **THEN** システム **SHALL** 接続を確立し、利用可能なツールのリストを返す
 - **WHEN** クライアントが無効なMCPプロトコルメッセージを送信した時 **THEN** システム **SHALL** 適切なエラーレスポンスを返し、接続を維持する
 - **WHILE** サーバーが起動している間 **THE SYSTEM SHALL** MCPプロトコル仕様v1.0に準拠した通信を維持する
-- **WHERE** サーバーが初期化される場合 **THE SYSTEM SHALL** FastMCPフレームワークを使用してMCPサーバーを構成する
+- **WHERE** サーバーが初期化される場合 **THE SYSTEM SHALL** mcp_lambda_handlerライブラリを使用してAWS LambdaでMCPサーバーを構成する
 
 ### 2.2 テキスト入力処理機能
 
 #### 2.2.1 ユーザーストーリー
 **AS A** クライアントアプリケーション  
-**I WANT** {page1:{text:["text1","text2",...]},page2{...}...}をサーバーに送信してスライド生成を要求したい  
+**I WANT** {page1:{text:["text1","text2",...]},page2{...}...}をLambda Function URLに送信してスライド生成を要求したい  
 **SO THAT** ユーザーが入力したテキストボックスを含むプレゼンテーションをPageの数だけ作成できる
 
 #### 2.2.2 受入基準（EARS形式）
@@ -104,14 +105,16 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 ## 3. 技術要件
 
 ### 3.1 パフォーマンス要件
-- **レスポンス時間**: 通常のテキスト入力（500文字以下）に対して2秒以内でスライド生成を完了する
-- **同時接続**: 最大10個の同時クライアント接続をサポートする
-- **メモリ使用量**: 単一スライド生成時のメモリ使用量を50MB以下に抑える
+- **レスポンス時間**: 通常のテキスト入力（500文字以下）に対して5秒以内でスライド生成を完了する（Lambda コールドスタート含む）
+- **同時実行**: AWS Lambda の同時実行制限内での処理
+- **メモリ使用量**: Lambda関数のメモリ設定内でスライド生成（推奨: 512MB以上）
+- **タイムアウト**: Lambda関数のタイムアウト設定内で処理完了（推奨: 30秒以下）
 
 ### 3.2 信頼性要件
-- **可用性**: 99.5%のアップタイム（開発環境での目標値）
-- **エラー回復**: 処理エラー発生時もサーバープロセスを継続する
+- **可用性**: AWS Lambdaの高可用性（99.95%以上）を活用
+- **エラー回復**: Lambda関数レベルでのエラー処理とログ出力
 - **データ整合性**: 生成されたPowerPointファイルが破損しないことを保証する
+- **コールドスタート**: 初回実行時の遅延を考慮した設計
 
 ### 3.3 セキュリティ要件
 - **入力検証**: 全ての入力パラメータに対してバリデーションを実行する
@@ -126,7 +129,8 @@ PowerPoint テキストボックス MCP サーバーは、クライアントか�
 ## 4. 非機能要件
 
 ### 4.1 互換性要件
-- **Python**: Python 3.11以上
+- **Python**: Python 3.11以上（AWS Lambda対応バージョン）
+- **AWS Lambda**: AWS Lambda Runtime対応
 - **PowerPoint**: Microsoft PowerPoint 2016以降で開けるファイル形式
 - **MCP**: MCP プロトコル v1.0準拠
 

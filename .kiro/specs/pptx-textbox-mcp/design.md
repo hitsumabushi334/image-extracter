@@ -8,16 +8,17 @@
 - **目的**: JSON形式の構造化入力から複数スライドを持つPowerPointファイルを生成
 - **入力形式**: `{page1:{text:["text1","text2",...]},page2:{...}...}`
 - **出力**: ページごとに複数テキストボックスを含む.pptxファイル
-- **プロトコル**: MCP (Model Context Protocol) v1.0準拠 (HTTPS接続のみ)
-- **フレームワーク**: FastMCP（Python）
+- **実行環境**: AWS Lambda
+- **プロトコル**: MCP (Model Context Protocol) v1.0準拠 (Lambda Function URL)
+- **フレームワーク**: mcp_lambda_handler（AWS Lambda専用）
 
 ### 1.2 要件との対応関係
-- **REQ 2.1**: FastMCPベースのMCPサーバー実装
+- **REQ 2.1**: mcp_lambda_handlerベースのAWS Lambda MCP実装
 - **REQ 2.2**: 複数ページ対応のJSON入力処理
 - **REQ 2.3**: ページごとの複数スライド・テキストボックス生成
 - **REQ 2.4**: バイナリ.pptxファイル出力
 - **REQ 2.5**: 包括的エラーハンドリング
-- **REQ 2.6**: 設定可能なサーバー構成
+- **REQ 2.6**: AWS Lambda環境変数による設定管理
 
 ## 2. アーキテクチャ設計
 
@@ -25,10 +26,12 @@
 
 ```mermaid
 graph TB
-    Client[MCPクライアント] --> Server[FastMCPサーバー]
-    Server --> Validator[入力検証]
-    Server --> Generator[PPTXジェネレーター]
-    Server --> Config[設定管理]
+    Client[MCPクライアント] --> URL[Lambda Function URL]
+    URL --> Lambda[AWS Lambda Runtime]
+    Lambda --> Handler[MCPLambdaHandler]
+    Handler --> Validator[入力検証]
+    Handler --> Generator[PPTXジェネレーター]
+    Handler --> Config[環境変数設定]
     
     Validator --> Parser[JSON解析]
     Generator --> Factory[スライドファクトリー]
@@ -39,20 +42,25 @@ graph TB
     
     subgraph "外部ライブラリ"
         PythonPPTX[python-pptx]
-        Pydantic[Pydantic]
+        MCPLib[mcp_lambda_handler]
+    end
+    
+    subgraph "AWS Services"
+        CloudWatch[CloudWatch Logs]
     end
     
     Generator --> PythonPPTX
-    Validator --> Pydantic
+    Handler --> MCPLib
+    Lambda --> CloudWatch
 ```
 
 ### 2.2 コンポーネント構成
 
 ```mermaid
 graph LR
-    subgraph "MCPレイヤー"
-        MCP[MCPハンドラー]
-        Tool[ツール定義]
+    subgraph "AWS Lambda Runtime"
+        LambdaHandler[lambda_handler]
+        MCPHandler[MCPLambdaHandler]
     end
     
     subgraph "ビジネスロジック"
@@ -65,16 +73,18 @@ graph LR
         Factory[ファクトリー]
     end
     
-    subgraph "インフラ"
-        Config[設定]
-        Logger[ログ]
-        Error[エラーハンドラー]
+    subgraph "AWS インフラ"
+        EnvVars[環境変数]
+        CloudWatch[CloudWatch]
+        ErrorHandler[エラーハンドラー]
     end
     
-    MCP --> Service
+    LambdaHandler --> MCPHandler
+    MCPHandler --> Service
     Service --> Validator
     Service --> Generator
     Generator --> Factory
+    MCPHandler --> CloudWatch
 ```
 
 ## 3. 技術スタック
@@ -83,10 +93,10 @@ graph LR
 
 | 技術 | バージョン | 用途 | 選定理由 |
 |------|-----------|------|----------|
-| Python | 3.11+ | ランタイム | 型ヒント・パフォーマンス向上 |
-| FastMCP | 最新 | MCPフレームワーク | 非同期処理・高性能 |
+| Python | 3.11+ | AWS Lambda Runtime | AWS Lambda対応・高性能 |
+| mcp_lambda_handler | 最新 | AWS Lambda MCP | Lambda特化・サーバーレス対応 |
 | python-pptx | 0.6.21+ | PowerPoint生成 | 成熟したライブラリ・豊富なAPI |
-| Pydantic | 2.0+ | データ検証 | 型安全性・JSON Schema対応 |
+| AWS Lambda | - | 実行環境 | サーバーレス・自動スケーリング |
 | uv | 最新 | パッケージ管理 | 高速依存解決・モダンツール |
 
 ### 3.2 開発・運用ツール
@@ -96,10 +106,10 @@ graph LR
 [project]
 name = "pptx-textbox-mcp"
 dependencies = [
-    "fastmcp>=0.1.0",
+    "awslabs-mcp-lambda-handler>=0.1.0",
     "python-pptx>=0.6.21",
     "pydantic>=2.0.0",
-    "structlog>=23.0.0",
+    "boto3>=1.26.0",
 ]
 ```
 
@@ -110,18 +120,20 @@ dependencies = [
 ```mermaid
 sequenceDiagram
     participant Client as MCPクライアント
-    participant Server as MCPサーバー
-    participant Validator as バリデーター
+    participant FuncURL as Lambda Function URL
+    participant Lambda as AWS Lambda
+    participant Handler as MCPLambdaHandler
     participant Generator as PPTXジェネレーター
     participant PPTX as python-pptx
+    participant CloudWatch as CloudWatch
     
-    Client->>Server: create_pptx_tool呼び出し
-    Server->>Validator: 入力データ検証
-    Validator->>Validator: JSON Schema検証
-    Validator->>Server: 検証結果
+    Client->>FuncURL: HTTP POST (MCP Request)
+    FuncURL->>Lambda: Lambda Invoke
+    Lambda->>Handler: handle_request(event, context)
+    Handler->>Handler: 入力データ検証
     
     alt 検証成功
-        Server->>Generator: PPTX生成要求
+        Handler->>Generator: PPTX生成要求
         Generator->>Generator: ページ数計算
         loop 各ページ
             Generator->>PPTX: スライド作成
@@ -129,11 +141,17 @@ sequenceDiagram
                 Generator->>PPTX: テキストボックス追加
             end
         end
-        Generator->>Server: バイナリデータ
-        Server->>Client: Base64エンコード済みPPTX
+        Generator->>Handler: バイナリデータ
+        Handler->>Lambda: Base64エンコード済みPPTX
+        Lambda->>FuncURL: HTTP Response
+        FuncURL->>Client: MCPレスポンス
     else 検証失敗
-        Server->>Client: エラーレスポンス
+        Handler->>Lambda: エラーレスポンス
+        Lambda->>FuncURL: HTTP Error Response
+        FuncURL->>Client: エラーレスポンス
     end
+    
+    Lambda->>CloudWatch: 実行ログ
 ```
 
 ### 4.2 データ変換フロー
@@ -156,60 +174,101 @@ graph TD
 
 ## 5. コンポーネント設計
 
-### 5.1 MCPハンドラー
+### 5.1 Lambda ハンドラー
 
 ```python
-from fastmcp import FastMCP
+from awslabs.mcp_lambda_handler import MCPLambdaHandler
 from pydantic import BaseModel
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+import json
+import base64
 
 class PPTXRequest(BaseModel):
     pages: Dict[str, Dict[str, List[str]]]
     template_config: Optional[Dict[str, Any]] = None
 
-class MCPHandler:
-    def __init__(self, config: Config):
-        self.app = FastMCP("pptx-textbox-mcp")
-        self.service = PPTXService(config)
-        self._register_tools()
+# MCPサーバーのインスタンス作成
+mcp_server = MCPLambdaHandler(name="pptx-textbox-mcp", version="1.0.0")
+
+@mcp_server.tool()
+def create_pptx_from_text(pages: str) -> str:
+    """
+    複数ページのテキストからPPTXファイルを生成
     
-    @tool
-    async def create_pptx_from_text(
-        self, 
-        pages: Dict[str, Dict[str, List[str]]]
-    ) -> str:
-        """複数ページのテキストからPPTXファイルを生成"""
-        request = PPTXRequest(pages=pages)
-        return await self.service.generate_pptx(request)
+    Args:
+        pages: JSON文字列形式のページデータ {page1:{text:["text1","text2"]}, ...}
+        
+    Returns:
+        Base64エンコードされたPPTXファイル
+    """
+    try:
+        # JSON文字列をパース
+        pages_data = json.loads(pages)
+        request = PPTXRequest(pages=pages_data)
+        
+        # PPTX生成サービス呼び出し
+        service = PPTXService()
+        pptx_binary = service.generate_pptx(request)
+        
+        # Base64エンコードして返却
+        return base64.b64encode(pptx_binary).decode('utf-8')
+        
+    except Exception as e:
+        raise Exception(f"PPTX生成エラー: {str(e)}")
+
+# AWS Lambdaエントリーポイント
+def lambda_handler(event, context):
+    """
+    AWS Lambda handler function.
+    """
+    return mcp_server.handle_request(event, context)
 ```
 
 ### 5.2 PPTXサービス
 
 ```python
+import os
+import logging
+from typing import Dict, Any
+
 class PPTXService:
-    def __init__(self, config: Config):
-        self.generator = PPTXGenerator(config)
+    def __init__(self):
+        self.generator = PPTXGenerator()
         self.validator = InputValidator()
-        self.logger = structlog.get_logger()
+        # Lambda環境でのロガー設定
+        self.logger = logging.getLogger()
+        self.logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
     
-    async def generate_pptx(self, request: PPTXRequest) -> str:
-        """PPTX生成のメイン処理"""
+    def generate_pptx(self, request: PPTXRequest) -> bytes:
+        """PPTX生成のメイン処理（同期処理）"""
         try:
             # 入力検証
-            validated_data = await self.validator.validate(request)
+            validated_data = self.validator.validate(request)
+            
+            # 環境変数から設定読み込み
+            config = self._load_lambda_config()
             
             # PPTX生成
-            pptx_data = await self.generator.create_presentation(validated_data)
+            pptx_data = self.generator.create_presentation(validated_data, config)
             
-            # Base64エンコード
-            return base64.b64encode(pptx_data).decode()
+            self.logger.info(f"PPTX生成完了: {len(validated_data.pages)}ページ")
+            return pptx_data
             
         except ValidationError as e:
-            self.logger.error("入力検証エラー", error=str(e))
-            raise MCPError(f"Invalid input: {e}")
+            self.logger.error(f"入力検証エラー: {str(e)}")
+            raise Exception(f"Invalid input: {e}")
         except Exception as e:
-            self.logger.error("PPTX生成エラー", error=str(e))
-            raise MCPError(f"Generation failed: {e}")
+            self.logger.error(f"PPTX生成エラー: {str(e)}")
+            raise Exception(f"Generation failed: {e}")
+    
+    def _load_lambda_config(self) -> Dict[str, Any]:
+        """Lambda環境変数から設定読み込み"""
+        return {
+            'max_pages': int(os.getenv('MAX_PAGES', '50')),
+            'max_text_boxes_per_page': int(os.getenv('MAX_TEXT_BOXES', '20')),
+            'max_text_length': int(os.getenv('MAX_TEXT_LENGTH', '1000')),
+            'default_font_size': int(os.getenv('DEFAULT_FONT_SIZE', '12')),
+        }
 ```
 
 ### 5.3 PPTXジェネレーター
@@ -217,19 +276,20 @@ class PPTXService:
 ```python
 from pptx import Presentation
 from pptx.util import Inches
+import io
+from typing import Dict, Any, List
 
 class PPTXGenerator:
-    def __init__(self, config: Config):
-        self.config = config
-        self.layout_factory = LayoutFactory(config)
+    def __init__(self):
+        self.layout_factory = LayoutFactory()
     
-    async def create_presentation(self, data: ValidatedData) -> bytes:
-        """プレゼンテーション生成"""
+    def create_presentation(self, data: ValidatedData, config: Dict[str, Any]) -> bytes:
+        """プレゼンテーション生成（同期処理）"""
         prs = Presentation()
         
         for page_name, page_data in data.pages.items():
             slide = self._create_slide(prs, page_name)
-            await self._add_text_boxes(slide, page_data.texts)
+            self._add_text_boxes(slide, page_data.texts, config)
         
         return self._save_to_bytes(prs)
     
@@ -239,13 +299,33 @@ class PPTXGenerator:
         slide = prs.slides.add_slide(slide_layout)
         return slide
     
-    async def _add_text_boxes(self, slide, texts: List[str]):
+    def _add_text_boxes(self, slide, texts: List[str], config: Dict[str, Any]):
         """テキストボックス配置"""
         layout = self.layout_factory.calculate_layout(len(texts))
         
         for i, text in enumerate(texts):
             position = layout.get_position(i)
-            self._add_text_box(slide, text, position)
+            self._add_text_box(slide, text, position, config)
+    
+    def _add_text_box(self, slide, text: str, position, config: Dict[str, Any]):
+        """個別テキストボックス追加"""
+        textbox = slide.shapes.add_textbox(
+            position.left, position.top, position.width, position.height
+        )
+        text_frame = textbox.text_frame
+        text_frame.text = text
+        
+        # フォント設定
+        paragraph = text_frame.paragraphs[0]
+        font = paragraph.runs[0].font
+        font.size = Pt(config.get('default_font_size', 12))
+    
+    def _save_to_bytes(self, prs: Presentation) -> bytes:
+        """プレゼンテーションをバイト列に変換"""
+        buffer = io.BytesIO()
+        prs.save(buffer)
+        buffer.seek(0)
+        return buffer.read()
 ```
 
 ### 5.4 レイアウトファクトリー
